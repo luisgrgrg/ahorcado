@@ -11,4 +11,5 @@ coverage/
 .DS_Store
 .sites-runtime/
 .vercel/
+supabase/.temp/
 dist/
