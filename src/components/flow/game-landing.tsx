@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import type { PlayerSession } from "@/domain/player/player.types";
 import { AuthService } from "@/lib/auth/auth.service";
 import { SupabaseRoomRepository } from "@/lib/repositories/supabase-room.repository";
-import { getGuestSession } from "@/lib/session/guest-session";
+import { createGuestName, getGuestSession, startGuestSession } from "@/lib/session/guest-session";
 
 const authService = new AuthService();
 const roomRepository = new SupabaseRoomRepository();
@@ -19,10 +19,29 @@ export function GameLanding() {
 
   useEffect(() => {
     let active = true;
-    void Promise.resolve().then(() => {
+    void Promise.resolve().then(async () => {
       if (!active) return;
       const guest = getGuestSession();
-      if (!guest) router.replace("/"); else setPlayer(guest);
+      if (guest) {
+        setPlayer(guest);
+        return;
+      }
+
+      if (authService.isAvailable()) {
+        try {
+          const session = await authService.getSession();
+          if (session) {
+            const displayName = session.displayName || createGuestName();
+            startGuestSession(displayName);
+            setPlayer({ ...session, displayName });
+            return;
+          }
+        } catch {
+          // Si no hay sesión, se fuerza al flujo inicial para crear la identidad temporal.
+        }
+      }
+
+      router.replace("/");
     });
     return () => { active = false; };
   }, [router]);

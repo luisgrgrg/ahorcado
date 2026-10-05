@@ -14,20 +14,42 @@ export function IdentityScreen() {
 
   useEffect(() => {
     let active = true;
-    void Promise.resolve().then(() => {
+    void Promise.resolve().then(async () => {
       if (!active) return;
       const existing = getGuestSession();
-      if (existing) router.replace("/inicio");
-      else setName(createGuestName());
+      if (existing) {
+        router.replace("/inicio");
+        return;
+      }
+
+      if (authService.isAvailable()) {
+        try {
+          const session = await authService.getSession();
+          if (session) {
+            startGuestSession(session.displayName || createGuestName());
+            router.replace("/inicio");
+            return;
+          }
+        } catch {
+          // Sin sesión autenticada, el flujo invitado continuará con el nombre temporal.
+        }
+      }
+
+      setName(createGuestName());
     });
     return () => { active = false; };
   }, [router]);
 
   const continueToGame = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const session = startGuestSession(name);
+    const session = startGuestSession(name.trim() || createGuestName());
     if (authService.isAvailable()) {
-      try { await authService.ensureAnonymousSession(session.displayName); } catch { /* The landing remains available for configuration and practice. */ }
+      try {
+        const existing = await authService.getSession();
+        if (!existing) await authService.ensureAnonymousSession(session.displayName);
+      } catch {
+        // The landing remains available for configuration and practice.
+      }
     }
     router.push("/inicio");
   };

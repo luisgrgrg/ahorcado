@@ -17,11 +17,38 @@ export function RoomScreen({ code }: { readonly code: string }) {
   const { room, loading, busy, error, startGame, guessLetter, restartGame, leaveRoom } = useRoomController(code);
 
   useEffect(() => {
-    void authService.getSession().then((session) => {
-      const local = getGuestSession();
-      if (!session?.userId || !local) router.replace("/inicio");
-      else setPlayer({ ...session, displayName: local.displayName });
-    }).catch(() => router.replace("/inicio"));
+    let active = true;
+    void (async () => {
+      try {
+        const local = getGuestSession();
+        const session = await authService.getSession();
+        if (!active) return;
+
+        if (session) {
+          const displayName = local?.displayName || session.displayName;
+          setPlayer({ ...session, displayName });
+          return;
+        }
+
+        if (!local) {
+          router.replace("/");
+          return;
+        }
+
+        const anonymous = await authService.ensureAnonymousSession(local.displayName);
+        if (!active) return;
+        setPlayer({ ...anonymous, displayName: local.displayName });
+      } catch {
+        const local = getGuestSession();
+        if (!active) return;
+        if (local) {
+          setPlayer(local);
+          return;
+        }
+        router.replace("/");
+      }
+    })();
+    return () => { active = false; };
   }, [router]);
 
   const leave = useCallback(async () => {
