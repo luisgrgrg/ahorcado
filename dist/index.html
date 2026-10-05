@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#5368d9">
+  <meta name="description" content="Un juego del ahorcado casual, accesible y listo para jugar.">
+  <title>Ahorcado Aventuras</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%235368d9'/%3E%3Cpath d='M18 49V13h26M32 13v9' stroke='%23fff' stroke-width='6' stroke-linecap='round'/%3E%3Ccircle cx='32' cy='29' r='7' fill='%23ffd35a'/%3E%3Cpath d='M32 36v12M24 41h16' stroke='%23ffd35a' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="game-header" aria-label="Cabecera del juego">
+      <a class="brand" href="#game" aria-label="Ahorcado Aventuras, ir al tablero">
+        <span class="brand-mark" aria-hidden="true">A</span>
+        <span><strong>Ahorcado</strong><small>Aventuras</small></span>
+      </a>
+
+      <div class="player-badge" aria-label="Jugador actual">
+        <span class="avatar" aria-hidden="true">★</span>
+        <span><small>Jugador</small><strong id="playerName">Explorador 482</strong></span>
+      </div>
+    </header>
+
+    <main id="game" class="game-card" tabindex="-1">
+      <div class="status-bar">
+        <div>
+          <span class="eyebrow" id="roundLabel">Ronda · Variado</span>
+          <h1 id="statusTitle">¡Descubre la palabra!</h1>
+        </div>
+        <div class="attempt-pill" id="attemptPill" aria-live="polite">
+          <span class="heart" aria-hidden="true">♥</span>
+          <span><strong id="attemptCount">6</strong><small>intentos</small></span>
+        </div>
+      </div>
+
+      <div class="board-layout">
+        <section class="word-zone" aria-labelledby="wordHeading">
+          <div class="zone-heading">
+            <span class="step-dot" aria-hidden="true">1</span>
+            <h2 id="wordHeading">Palabra secreta</h2>
+          </div>
+          <div id="wordBoard" class="word-board" aria-live="polite" aria-label="Palabra oculta"></div>
+          <p class="hint" id="hintText"><span aria-hidden="true">✦</span> Pista: prepárate para jugar</p>
+        </section>
+
+        <section class="figure-zone" aria-labelledby="figureHeading">
+          <div class="zone-heading compact-heading">
+            <span class="step-dot" aria-hidden="true">2</span>
+            <h2 id="figureHeading">Tu progreso</h2>
+          </div>
+          <div class="figure-stage" role="img" id="hangmanAlt" aria-label="Ahorcado sin errores">
+            <svg class="hangman" viewBox="0 0 280 230" aria-hidden="true">
+              <path class="gallows" d="M36 210h172M67 210V24h119M186 24v30" />
+              <path class="gallows-brace" d="M68 62l38-38" />
+              <g class="person">
+                <circle class="body-part" data-part="0" cx="186" cy="76" r="22" />
+                <path class="body-part" data-part="1" d="M186 98v61" />
+                <path class="body-part" data-part="2" d="M186 116l-35 24" />
+                <path class="body-part" data-part="3" d="M186 116l35 24" />
+                <path class="body-part" data-part="4" d="M186 159l-29 36" />
+                <path class="body-part" data-part="5" d="M186 159l29 36" />
+              </g>
+            </svg>
+            <div class="figure-caption" id="figureCaption"><strong>¡Todo bien!</strong><span>Aún no hay errores</span></div>
+          </div>
+          <div class="progress-wrap">
+            <div class="progress-label"><span>Errores</span><strong id="errorProgress">0 de 6</strong></div>
+            <div class="progress-track" role="progressbar" aria-label="Errores cometidos" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0" id="progressTrack">
+              <span id="progressFill"></span>
+            </div>
+          </div>
+        </section>
+
+        <section class="keyboard-zone" aria-labelledby="keyboardHeading">
+          <div class="zone-heading keyboard-heading">
+            <div class="heading-label"><span class="step-dot" aria-hidden="true">3</span><h2 id="keyboardHeading">Elige una letra</h2></div>
+            <span class="desktop-tip">También puedes usar tu teclado</span>
+          </div>
+          <div id="keyboard" class="keyboard" aria-label="Teclado de letras"></div>
+          <div class="wrong-letters" id="wrongLetters" aria-live="polite">
+            <span class="wrong-title">Letras fallidas</span>
+            <span id="wrongList" class="wrong-list">Ninguna todavía</span>
+          </div>
+        </section>
+      </div>
+
+      <footer class="game-actions">
+        <button class="game-button secondary" id="newGameButton" type="button">
+          <span aria-hidden="true">↻</span> Nueva partida
+        </button>
+        <div class="mini-stats" aria-label="Estadísticas de esta sesión">
+          <span><strong id="winsCount">0</strong> ganadas</span>
+          <span class="divider" aria-hidden="true"></span>
+          <span>Racha <strong id="streakCount">0</strong></span>
+        </div>
+      </footer>
+    </main>
+
+    <p class="page-note">Piensa, prueba y diviértete. Cada palabra es una nueva aventura.</p>
+  </div>
+
+  <dialog class="game-dialog" id="categoryDialog" aria-labelledby="categoryTitle">
+    <form method="dialog" class="dialog-card selector-card">
+      <button class="icon-button close-dialog" value="cancel" aria-label="Cerrar selector">×</button>
+      <span class="dialog-kicker">Nueva partida</span>
+      <h2 id="categoryTitle">Elige una aventura</h2>
+      <p>Cada tema trae palabras y pistas diferentes.</p>
+      <div class="category-grid" id="categoryGrid">
+        <button type="button" class="category-card" data-category="animales"><span class="category-icon" aria-hidden="true">♞</span><strong>Animales</strong><small>Del bosque al océano</small></button>
+        <button type="button" class="category-card" data-category="comida"><span class="category-icon" aria-hidden="true">♨</span><strong>Comida</strong><small>Sabores deliciosos</small></button>
+        <button type="button" class="category-card" data-category="aventura"><span class="category-icon" aria-hidden="true">⚑</span><strong>Aventura</strong><small>Lugares por explorar</small></button>
+        <button type="button" class="category-card featured" data-category="variado"><span class="category-icon" aria-hidden="true">✦</span><strong>Sorpresa</strong><small>Un poco de todo</small></button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="game-dialog result-dialog" id="resultDialog" aria-labelledby="resultTitle">
+    <div class="dialog-card result-card">
+      <div class="result-burst" aria-hidden="true"><span id="resultIcon">★</span></div>
+      <span class="dialog-kicker" id="resultKicker">Ronda completada</span>
+      <h2 id="resultTitle">¡Palabra descubierta!</h2>
+      <p id="resultMessage">Tu intuición estuvo a la altura.</p>
+      <div class="answer-chip"><small>La palabra era</small><strong id="resultWord">AVENTURA</strong></div>
+      <div class="result-stats" aria-label="Resultado de la partida">
+        <div><strong id="resultErrors">0</strong><span>errores</span></div>
+        <div><strong id="resultLetters">0</strong><span>letras usadas</span></div>
+        <div><strong id="resultStreak">1</strong><span>de racha</span></div>
+      </div>
+      <div class="result-actions">
+        <button class="game-button primary" id="playAgainButton" type="button"><span aria-hidden="true">↻</span> Jugar otra vez</button>
+        <button class="text-button" id="changeCategoryButton" type="button">Cambiar tema</button>
+      </div>
+    </div>
+  </dialog>
+
+  <div class="sr-only" id="announcer" aria-live="assertive"></div>
+  <script src="app.js"></script>
+</body>
+</html>
