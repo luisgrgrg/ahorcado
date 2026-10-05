@@ -13,6 +13,7 @@ function clientWithAuth(overrides: Record<string, unknown> = {}) {
     auth: {
       signUp: vi.fn().mockResolvedValue({ data: { session }, error: null }),
       signInWithPassword: vi.fn().mockResolvedValue({ data: { session }, error: null }),
+      signInAnonymously: vi.fn().mockResolvedValue({ data: { session: { user: { ...user, is_anonymous: true } } }, error: null }),
       signOut: vi.fn().mockResolvedValue({ error: null }),
       getSession: vi.fn().mockResolvedValue({ data: { session }, error: null }),
       onAuthStateChange: vi.fn(),
@@ -51,5 +52,12 @@ describe("AuthService", () => {
     mockedCreateClient.mockReturnValue(client as never);
     await new AuthService().signOut();
     expect(client.auth.signOut).toHaveBeenCalledOnce();
+  });
+
+  it("QA-AUTH-006 crea una identidad anónima para las salas", async () => {
+    const client = clientWithAuth({ getSession: vi.fn().mockResolvedValue({ data: { session: null }, error: null }) });
+    mockedCreateClient.mockReturnValue(client as never);
+    await expect(new AuthService().ensureAnonymousSession("Invitado 482")).resolves.toMatchObject({ mode: "guest", userId: "user-1" });
+    expect(client.auth.signInAnonymously).toHaveBeenCalledWith({ options: { data: { display_name: "Invitado 482" } } });
   });
 });

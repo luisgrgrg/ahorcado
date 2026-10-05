@@ -4,6 +4,7 @@ import { type FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { GameButton } from "@/components/ui/game-button";
 import { AuthService } from "@/lib/auth/auth.service";
+import Link from "next/link";
 import { startGuestSession } from "@/lib/session/guest-session";
 
 const authService = new AuthService();
@@ -19,11 +20,6 @@ export function AuthScreen() {
   const [busy, setBusy] = useState(false);
   const authAvailable = authService.isAvailable();
 
-  const continueAsGuest = () => {
-    startGuestSession();
-    router.push("/juego");
-  };
-
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setBusy(true);
@@ -35,11 +31,13 @@ export function AuthScreen() {
         if (result.needsConfirmation) {
           setMessage("Cuenta creada. Revisa tu correo para confirmar el acceso.");
         } else {
-          router.push("/juego");
+          startGuestSession(displayName.trim() || email.split("@")[0] || "Jugador");
+          router.push("/inicio");
         }
       } else {
-        await authService.signIn({ email, password });
-        router.push("/juego");
+        const session = await authService.signIn({ email, password });
+        startGuestSession(session.displayName);
+        router.push("/inicio");
       }
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "No fue posible completar el acceso.");
@@ -54,10 +52,10 @@ export function AuthScreen() {
         <div className="auth-illustration" aria-hidden="true">
           <span className="auth-spark one">✦</span><span className="auth-spark two">★</span><span className="auth-letter">A</span>
         </div>
-        <span className="eyebrow">Ahorcado Aventuras</span>
-        <h1 id="welcome-title">Encuentra la palabra.<br />Salva la aventura.</h1>
-        <p>Entra como invitado o guarda tus partidas con una cuenta.</p>
-        <GameButton type="button" onClick={continueAsGuest}>Continuar como invitado</GameButton>
+        <Link className="back-link" href="/configuracion">← Volver a configuración</Link>
+        <span className="eyebrow">Función opcional</span>
+        <h1 id="welcome-title">Guarda tu<br />aventura.</h1>
+        <p>No necesitas una cuenta para jugar. Inicia sesión solo si quieres conservar tu identidad e historial.</p>
       </section>
 
       <section className="auth-card" aria-labelledby="auth-title">

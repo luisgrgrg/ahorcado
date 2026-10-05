@@ -33,7 +33,7 @@ export function GameScreen() {
   }, [router]);
 
   const signOut = async () => {
-    if (player?.mode === "authenticated") await authService.signOut();
+    if (player?.userId) await authService.signOut();
     clearGuestSession();
     router.replace("/");
   };

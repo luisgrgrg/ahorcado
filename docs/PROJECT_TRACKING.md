@@ -53,3 +53,25 @@
 3. Preparar commits académicos y remoto GitHub.
 4. Configurar Vercel y variables.
 5. Validar producción y completar evidencias.
+
+## Bloque 5 — Flujo principal y salas cooperativas
+
+**Actividad:** sustituir el login protagonista por nombre temporal, landing de dos acciones y acceso secundario a cuenta, historial y configuración.
+**Rol:** UX / Programador.
+**Estado:** Implementado y verificado localmente.
+**Resultado:** flujo `/` → `/inicio` → crear/entrar → `/sala/[code]`; práctica individual preservada en `/juego`.
+
+**Actividad:** diseñar persistencia de salas, participantes, juegos y palabra privada.
+**Rol:** Arquitecto / Responsable de datos.
+**Estado:** Implementado en migración, pendiente de aplicación remota.
+**Resultado:** estados tipados, RLS por membresía, permisos explícitos, RPC transaccionales, publicación Realtime y secreto en esquema `private`.
+
+**Actividad:** lobby, turnos cooperativos, fin de partida, replay y salida.
+**Rol:** Programador.
+**Estado:** Implementado.
+**Resultado:** anfitrión explícito, teclado condicionado por turno, estado compartido, resultado revelado al finalizar y sala conservada al repetir.
+
+**Problema real:** no existe un proyecto Supabase propio conectado y Docker Desktop no ofrece un motor local disponible.
+**Decisión:** no usar el proyecto remoto ajeno visible ni simular salas en `localStorage`, porque rompería la fuente de verdad y expondría la palabra. La UI informa que las salas requieren configuración; onboarding, landing y práctica siguen disponibles.
+
+**QA local:** 34/34 pruebas, TypeScript y lint correctos. La verificación multicliente real continúa pendiente hasta conectar Supabase y aplicar las migraciones.

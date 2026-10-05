@@ -3,7 +3,7 @@ import type { PlayerSession } from "@/domain/player/player.types";
 const GUEST_KEY = "hangman.guest";
 
 export function createGuestName(): string {
-  return `Jugador ${100 + Math.floor(Math.random() * 900)}`;
+  return `Invitado ${100 + Math.floor(Math.random() * 900)}`;
 }
 
 export function startGuestSession(displayName = createGuestName()): PlayerSession {

@@ -34,6 +34,20 @@ export class AuthService {
     return this.toPlayerSession(data.session);
   }
 
+  async ensureAnonymousSession(displayName: string): Promise<PlayerSession> {
+    const client = this.requireClient();
+    const { data: current, error: sessionError } = await client.auth.getSession();
+    if (sessionError) throw new Error(sessionError.message);
+    if (current.session) return this.toPlayerSession(current.session);
+
+    const { data, error } = await client.auth.signInAnonymously({
+      options: { data: { display_name: displayName.trim().slice(0, 32) || "Invitado" } },
+    });
+    if (error) throw new Error(error.message);
+    if (!data.session) throw new Error("No fue posible preparar la identidad de invitado.");
+    return this.toPlayerSession(data.session);
+  }
+
   async signOut(): Promise<void> {
     const client = this.requireClient();
     const { error } = await client.auth.signOut();
@@ -60,7 +74,7 @@ export class AuthService {
   private toPlayerSession(session: Session): PlayerSession {
     const metadataName = session.user.user_metadata.display_name;
     return {
-      mode: "authenticated",
+      mode: session.user.is_anonymous ? "guest" : "authenticated",
       userId: session.user.id,
       displayName: typeof metadataName === "string" && metadataName.trim() ? metadataName : session.user.email?.split("@")[0] || "Jugador",
       email: session.user.email ?? null,
